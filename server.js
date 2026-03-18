@@ -422,24 +422,33 @@ app.get('/api/macro/treasury', async function(req, res) {
 });
 
 // ── /api/search?q=Apple ──────────────────────────────────────
-// Finnhub symbol search
+// Twelve Data symbol search
 app.get('/api/search', async function(req, res) {
   var q  = req.query.q || '';
-  if (!q) return res.json({ result: [] });
+  if (!q) return res.json([]);
 
   var ck     = 'search:' + q.toLowerCase();
   var cached = cacheGet(ck);
   if (cached) return res.json(cached);
 
-  var key = process.env.FH_KEY;
-  if (!key) return res.json({ result: [] });
+  var key = process.env.TD_KEY;
+  if (!key) return res.json([]);
 
-  var url = 'https://finnhub.io/api/v1/search?q=' + encodeURIComponent(q) + '&token=' + key;
+  var url = 'https://api.twelvedata.com/symbol_search?symbol=' + encodeURIComponent(q) + '&apikey=' + key;
   var d   = await safeFetch(url);
 
-  if (!d) return res.json({ result: [] });
-  cacheSet(ck, d);
-  res.json(d);
+  if (!d || !d.data) return res.json([]);
+
+  var results = d.data.map(function(item) {
+    return {
+      symbol:      item.symbol,
+      description: item.instrument_name,
+      type:        item.instrument_type,
+    };
+  });
+
+  cacheSet(ck, results);
+  res.json(results);
 });
 
 // ── /api/sector ──────────────────────────────────────────────
