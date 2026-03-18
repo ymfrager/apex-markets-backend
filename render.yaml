@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: apex-markets-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: TD_KEY
+        value: 58eaf01b0d7041529bc5f3b8dbcab103
+      - key: FH_KEY
+        sync: false
+      - key: AV_KEY
+        sync: false
+      - key: FRED_KEY
+        sync: false
